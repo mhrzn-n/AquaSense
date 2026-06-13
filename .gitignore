@@ -141,3 +141,37 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Environment files - NEVER commit these
+.env
+.env.local
+.env.production
+
+# Firebase service account key
+serviceAccountKey.json
+firebase-adminsdk*.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Frontend build
+frontend/dist/
+frontend/build/
+
+# Python / ML
+__pycache__/
+*.pyc
+ml-model/data/*.csv
+ml-model/saved-models/*.pkl
+
+# Arduino / PlatformIO
+firmware/.pio/
+firmware/.vscode/
+
+# Firmware credentials - NEVER commit
+firmware/config/config.h
+
+# OS
+.DS_Store
+Thumbs.db

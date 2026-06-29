@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/tanks', authenticate, tankRoutes);
+app.use('/api/tanks', tankRoutes);
 app.use('/api/alerts', authenticate, alertRoutes);
 app.use('/api/settings', authenticate, settingsRoutes);
 

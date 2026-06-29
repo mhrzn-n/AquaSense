@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticate } from '../middleware/authenticate.js';
 import {
   getUserTanks,
   createTank,
@@ -12,22 +13,24 @@ import {
 } from '../controllers/readingController.js';
 import { getForecast } from '../controllers/forecastController.js';
 import { readingsLimiter } from '../utils/ratelimiter.js';
+import { deviceAuthenticate } from '../middleware/deviceAuthenticate.js';
 
 const router = express.Router();
 
-// Tank CRUD routes
-router.get('/', getUserTanks);
-router.post('/', createTank);
-router.get('/:tankId', getTankById);
-router.put('/:tankId', updateTank);
-router.delete('/:tankId', deleteTank);
+// Tank CRUD routes — requiring Firebase token authentication
+router.get('/', authenticate, getUserTanks);
+router.post('/', authenticate, createTank);
+router.get('/:tankId', authenticate, getTankById);
+router.put('/:tankId', authenticate, updateTank);
+router.delete('/:tankId', authenticate, deleteTank);
 
-// Readings subcollection routes
-// Applying stricter rate limit on POST to prevent flooding from ESP32
-router.post('/:tankId/readings', readingsLimiter, addReading);
-router.get('/:tankId/readings', getReadings);
+// Readings POST — accepting both Firebase token and ESP32 device key
+router.post('/:tankId/readings', readingsLimiter, deviceAuthenticate, addReading);
 
-// Forecast route
-router.get('/:tankId/forecast', getForecast);
+// Readings GET — requiring Firebase token authentication
+router.get('/:tankId/readings', authenticate, getReadings);
+
+// Forecast route — requiring Firebase token authentication
+router.get('/:tankId/forecast', authenticate, getForecast);
 
 export default router;

@@ -4,9 +4,20 @@ import { checkAndStoreAlerts } from './alertController.js';
 // Adding a new sensor reading to the tank readings subcollection
 export async function addReading(req, res) {
   try {
-    const userId = req.user.uid;
     const { tankId } = req.params;
     const { level, temperature, tds, ph, turbidity } = req.body;
+
+    // Handling device requests differently from frontend requests
+    // ESP32 must include userId as a query parameter since it has no Firebase token
+    let userId;
+    if (req.user.isDevice) {
+      userId = req.query.userId;
+      if (!userId) {
+        return res.status(400).json({ message: 'userId query parameter required for device requests' });
+      }
+    } else {
+      userId = req.user.uid;
+    }
 
     // Verifying the tank exists and belongs to this user
     const tankRef = db

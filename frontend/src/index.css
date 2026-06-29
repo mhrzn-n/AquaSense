@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* -------------------------
+   WATER WAVY BACKGROUND
+   ------------------------- */
+
+.water-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Gradient */
+.water-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #b3ecff 0%, #66d9ff 50%, #0099cc 100%);
+  z-index: -3;
+}
+
+/* Moving waves layer 1 */
+.water-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("https://i.imgur.com/HaN39XE.png"); /* transparent wave texture */
+  opacity: 0.35;
+  animation: waveMove 8s infinite linear;
+  z-index: -2;
+}
+
+/* Moving waves layer 2 */
+.water-bg .wave-top {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("https://i.imgur.com/HaN39XE.png");
+  opacity: 0.25;
+  animation: waveMove2 12s infinite linear;
+  z-index: -1;
+}
+
+/* Wave animation */
+@keyframes waveMove {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 1000px;
+  }
+}
+
+@keyframes waveMove2 {
+  from {
+    background-position-x: 1000px;
+  }
+  to {
+    background-position-x: 0;
+  }
+}
+
+/* -------------------------
+     GLASS — WATERY CARD EFFECT
+     ------------------------- */
+.water-card,
+.tableCard,
+.alert {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0, 150, 200, 0.25);
+}
+
+body {
+  font-family: Poppins;
+}

@@ -3,13 +3,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAS3ewaT8u-n-f5pccaxOh847tAngOxFHc",
-  authDomain: "AquaSense.firebaseapp.com",
-  projectId: "AquaSense",
-  storageBucket: "AquaSense.firebasestorage.app",
-  messagingSenderId: "198876776533",
-  appId: "1:198876776533:web:cb683d8d7f5b6693d1ecdc",
-  measurementId: "G-W300K35HYG",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase

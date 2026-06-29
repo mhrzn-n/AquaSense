@@ -1,190 +1,182 @@
 import { useState, useEffect } from "react";
-import { Card } from "flowbite-react";
-import { Line, Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   LineElement,
-  BarElement,
   PointElement,
   LinearScale,
   CategoryScale,
+  Tooltip,
+  Legend,
 } from "chart.js";
-import { motion } from "motion/react";
+import { getTanks, getReadings } from "../../services/api";
 
 ChartJS.register(
   LineElement,
   PointElement,
-  BarElement,
   LinearScale,
-  CategoryScale
+  CategoryScale,
+  Tooltip,
+  Legend
 );
 
-// Function to generate a bubble with random properties
-const generateBubble = () => ({
-  x: Math.random() * 100,
-  y: Math.random() * 100,
-  size: 30 + Math.random() * 60,
-  offsetX: Math.random() * 20 - 10,
-  offsetY: Math.random() * 20 - 10,
+const chartOptions = {
+  responsive: true,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { display: false } },
+    y: { grid: { color: 'rgba(0,0,0,0.05)' } },
+  },
+};
+
+const makeChartData = (readings, field, color) => ({
+  labels: readings.map(r =>
+    new Date(r.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  ),
+  datasets: [{
+    data: readings.map(r => r[field]),
+    borderColor: color,
+    backgroundColor: color + '33',
+    borderWidth: 2,
+    pointRadius: 3,
+    tension: 0.4,
+  }],
 });
 
 const Analytics = () => {
-  const [filter, setFilter] = useState("today");
+  const [tanks, setTanks] = useState([]);
+  const [selectedTankId, setSelectedTankId] = useState(null);
+  const [readings, setReadings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Initialize bubbles
-  const [bubbles, setBubbles] = useState(
-    Array.from({ length: 14 }).map(() => generateBubble())
-  );
-
-  // Update bubble offsets periodically for smooth drifting
   useEffect(() => {
-    const interval = setInterval(() => {
-      setBubbles((prev) =>
-        prev.map((b) => ({
-          ...b,
-          offsetX: Math.random() * 20 - 10,
-          offsetY: Math.random() * 20 - 10,
-        }))
-      );
-    }, 4000); // update every 4 seconds
-    return () => clearInterval(interval);
+    getTanks()
+      .then(data => {
+        const list = data.tanks || [];
+        setTanks(list);
+        if (list.length > 0) setSelectedTankId(list[0].tankId);
+      })
+      .catch(() => setError('Failed to load tanks.'));
   }, []);
 
-  const mockData = {
-    today: {
-      waterLevels: [
-        { time: "10:00", value: 80 },
-        { time: "10:10", value: 78 },
-        { time: "10:20", value: 76 },
-        { time: "10:30", value: 74 },
-        { time: "10:40", value: 72 },
-      ],
-      pumpHours: [{ day: "Today", hours: 2.3 }],
-    },
-    week: {
-      waterLevels: [
-        { time: "Mon", value: 90 },
-        { time: "Tue", value: 85 },
-        { time: "Wed", value: 82 },
-        { time: "Thu", value: 78 },
-        { time: "Fri", value: 80 },
-        { time: "Sat", value: 75 },
-        { time: "Sun", value: 70 },
-      ],
-      pumpHours: [
-        { day: "Mon", hours: 4 },
-        { day: "Tue", hours: 3.5 },
-        { day: "Wed", hours: 4.2 },
-        { day: "Thu", hours: 3.8 },
-        { day: "Fri", hours: 4.5 },
-        { day: "Sat", hours: 2 },
-        { day: "Sun", hours: 1.5 },
-      ],
-    },
-    month: {
-      waterLevels: [
-        { time: "Week 1", value: 88 },
-        { time: "Week 2", value: 82 },
-        { time: "Week 3", value: 79 },
-        { time: "Week 4", value: 73 },
-      ],
-      pumpHours: [
-        { day: "Week 1", hours: 15 },
-        { day: "Week 2", hours: 18 },
-        { day: "Week 3", hours: 16 },
-        { day: "Week 4", hours: 12 },
-      ],
-    },
-  };
-
-  const current = mockData[filter];
-
-  const lineChartData = {
-    labels: current.waterLevels.map((x) => x.time),
-    datasets: [
-      {
-        label: "Water Level (%)",
-        data: current.waterLevels.map((x) => x.value),
-        borderWidth: 3,
-        borderColor: "#0099cc",
-        backgroundColor: "rgba(0, 153, 204, 0.25)",
-      },
-    ],
-  };
-
-  const barChartData = {
-    labels: current.pumpHours.map((x) => x.day),
-    datasets: [
-      {
-        label: "Pump Run Hours",
-        data: current.pumpHours.map((x) => x.hours),
-        backgroundColor: "rgba(0, 180, 255, 0.55)",
-        borderColor: "#00aaff",
-        borderWidth: 1,
-      },
-    ],
-  };
+  useEffect(() => {
+    if (!selectedTankId) return;
+    setLoading(true);
+    getReadings(selectedTankId, 50)
+      .then(data => setReadings(data.readings || []))
+      .catch(() => setError('Failed to load readings.'))
+      .finally(() => setLoading(false));
+  }, [selectedTankId]);
 
   return (
-    <div className="relative min-h-screen p-6 overflow-hidden">
-      {/* Smooth drifting bubbles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {bubbles.map((b, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              x: b.x + b.offsetX,
-              y: b.y + b.offsetY,
-              scale: [1, 1.15, 1],
-              opacity: [0.7, 1, 0.7],
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 15,
-              damping: 12,
-              repeat: Infinity,
-              repeatType: "mirror",
-            }}
-            className="absolute rounded-full bg-blue-300/40 blur-md shadow-xl"
-            style={{
-              width: b.size,
-              height: b.size,
-              left: `${b.x}%`,
-              top: `${b.y}%`,
-            }}
-          />
-        ))}
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="max-w-5xl mx-auto">
+
+        {/* HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
+          <p className="mt-2 text-slate-600">
+            Historical sensor readings for your tanks
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+            {error}
+          </div>
+        )}
+
+        {/* TANK SELECTOR */}
+        {tanks.length > 0 && (
+          <div className="flex gap-3 mb-6 flex-wrap">
+            {tanks.map(tank => (
+              <button
+                key={tank.tankId}
+                onClick={() => setSelectedTankId(tank.tankId)}
+                className={`px-4 py-2 rounded-xl font-medium transition ${
+                  selectedTankId === tank.tankId
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-blue-50'
+                }`}
+              >
+                {tank.tankName}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : readings.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-200">
+            <p className="text-slate-500">No readings yet for this tank.</p>
+            <p className="text-slate-400 text-sm mt-2">
+              Readings will appear here once your ESP32 starts sending data.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* WATER LEVEL */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">
+                Water Level
+              </h2>
+              <p className="text-xs text-slate-400 mb-4">%</p>
+              <Line data={makeChartData(readings, 'level', '#3b82f6')} options={chartOptions} />
+            </div>
+
+            {/* TEMPERATURE */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">
+                Temperature
+              </h2>
+              <p className="text-xs text-slate-400 mb-4">°C</p>
+              <Line data={makeChartData(readings, 'temperature', '#f97316')} options={chartOptions} />
+            </div>
+
+            {/* TDS */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">
+                TDS — Total Dissolved Solids
+              </h2>
+              <p className="text-xs text-slate-400 mb-4">ppm — good below 300</p>
+              <Line data={makeChartData(readings, 'tds', '#8b5cf6')} options={chartOptions} />
+            </div>
+
+            {/* PH */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">
+                pH Level
+              </h2>
+              <p className="text-xs text-slate-400 mb-4">good range 6.5–8.5</p>
+              <Line data={makeChartData(readings, 'ph', '#10b981')} options={chartOptions} />
+            </div>
+
+            {/* TURBIDITY */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">
+                Turbidity
+              </h2>
+              <p className="text-xs text-slate-400 mb-4">NTU — good below 2</p>
+              <Line data={makeChartData(readings, 'turbidity', '#06b6d4')} options={chartOptions} />
+            </div>
+
+            {/* FRESHNESS WINDOW */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">
+                Freshness Window
+              </h2>
+              <p className="text-xs text-slate-400 mb-4">hours remaining — not a safety verdict</p>
+              <Line data={makeChartData(readings, 'freshness_window_hours', '#f59e0b')} options={chartOptions} />
+            </div>
+
+          </div>
+        )}
       </div>
-
-      <h1 className="font-bold drop-shadow-md relative z-10 md:text-4xl">
-        Analytics Overview
-      </h1>
-
-      <div className="flex justify-end mb-4 relative z-10">
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="border rounded-xl px-3 py-2 bg-white/70 backdrop-blur-md shadow-md"
-        >
-          <option value="today">Today</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-        </select>
-      </div>
-
-      <Card className="water-card mb-6 relative z-10">
-        <h2 className="text-2xl font-semibold mb-4 text-blue-700">
-          Water Level Trend
-        </h2>
-        <Line data={lineChartData} />
-      </Card>
-
-      <Card className="water-card relative z-10">
-        <h2 className="text-2xl font-semibold mb-4 text-blue-700">
-          Pump Activity (Hours)
-        </h2>
-        <Bar data={barChartData} />
-      </Card>
     </div>
   );
 };

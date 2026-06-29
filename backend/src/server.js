@@ -5,13 +5,14 @@ import { authenticate } from './middleware/authenticate.js';
 import tankRoutes from './routes/tankRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
+import { generalLimiter } from './utils/ratelimiter.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS — only allow requests from the frontend dev server
+// Allowing requests from the frontend dev server only
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -20,7 +21,10 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check — confirms server is running
+// Applying general rate limiting to all API routes
+app.use('/api', generalLimiter);
+
+// Health check confirming server is running
 app.get('/', (req, res) => {
   res.json({ message: 'AquaSense backend is running.' });
 });

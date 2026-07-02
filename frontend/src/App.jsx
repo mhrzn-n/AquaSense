@@ -21,9 +21,9 @@ const DashboardLayout = lazy(() => import("./pages/Dashboard/DashboardLayout"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const Alerts = lazy(() => import("./pages/Dashboard/Alerts"));
 
-const Analytics = lazy(() => import("./pages/Dashboard/Analytics"));
-const Reports = lazy(() => import("./pages/Dashboard/Reports"));
-const Settings = lazy(() => import("./pages/Dashboard/Settings"));
+const Analytics = lazy(() => import("./pages/Dashboard/analytics"));
+const Reports = lazy(() => import("./pages/Dashboard/reports"));
+const Settings = lazy(() => import("./pages/Dashboard/settings"));
 
 
 const App = () => {

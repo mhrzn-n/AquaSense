@@ -107,7 +107,7 @@ const LeftSideBar = ({
                 isCompact ? "text-lg" : "text-2xl tracking-wide"
               }`}
             >
-              {isCompact ? "H₂O" : "H₂Otronics"}
+              {isCompact ? "H₂O" : "AquaSense"}
             </p>
             <button
               type="button"
@@ -168,7 +168,7 @@ const LeftSideBar = ({
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <p className="text-2xl font-semibold tracking-wide uppercase text-slate-900">
-              H₂Otronics
+              AquaSense
             </p>
             {/* <button
               type="button"

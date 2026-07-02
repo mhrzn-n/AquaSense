@@ -15,7 +15,7 @@ const TeamSection = () => {
             Our Team
           </h3>
           <p className="mt-2 text-sm text-gray-600 md:text-base">
-            Meet the brilliant minds behind H₂Otronics
+            Meet the brilliant minds behind AquaSense
           </p>
         </div>
 

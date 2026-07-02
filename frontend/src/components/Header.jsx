@@ -43,7 +43,7 @@ const Header = () => {
           className="flex items-center space-x-2 text-2xl font-bold text-blue-800"
           onClick={handleLinkClick}
         >
-          <span>H₂Otronics</span>
+          <span>AquaSense</span>
         </Link>
 
         {/* Desktop Navigation */}

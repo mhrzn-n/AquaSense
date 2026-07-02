@@ -14,7 +14,7 @@ const About = () => {
             About Us
           </h2>
           <p className="mb-8 text-lg text-gray-700 md:text-xl text-justify leading-tight">
-            H₂Otronics is a cutting-edge IoT water tank monitoring system
+            AquaSense is a cutting-edge IoT water tank monitoring system
             designed to make water management smart, efficient, and hassle-free.
             Our platform enables real-time monitoring of water levels, automatic
             pump control, and instant notifications for any critical changes.

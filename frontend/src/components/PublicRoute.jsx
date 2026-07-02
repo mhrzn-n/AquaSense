@@ -1,13 +1,18 @@
 import { Navigate, useLocation } from "react-router-dom";
-import Cookies from "js-cookie";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase/Firebase";
+import Loading from "./Loading";
 
 const PublicRoute = ({ children }) => {
-  const token = Cookies.get("authToken");
+  const [user, loading] = useAuthState(auth);
   const location = useLocation();
 
-  // Only block signin/signup
+  if (loading) {
+    return <Loading />;
+  }
+
   if (
-    token &&
+    user &&
     (location.pathname === "/signin" || location.pathname === "/signup")
   ) {
     return <Navigate to="/dashboard" replace />;

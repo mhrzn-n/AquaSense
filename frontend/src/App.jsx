@@ -4,6 +4,7 @@ import PublicRoute from "./components/PublicRoute";
 import PublicLayout from "./components/PublicLayout";
 import Loading from "./components/Loading";
 import { lazy, Suspense } from "react";
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 
 const Home = lazy(() => import("./pages/Home"));
@@ -58,6 +59,7 @@ const App = () => {
                 <Route path="contact" element={<ContactSection />} />
                 <Route path="signin" element={<Signin />} />
                 <Route path="signup" element={<Signup />} />
+                <Route path="verify-email" element={<VerifyEmail />} />
               </Route>
 
               {/* Protected routes */}

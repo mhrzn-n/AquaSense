@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "../firebase/Firebase";
 
 function Signup() {
@@ -28,16 +28,17 @@ function Signup() {
     setLoading(true);
 
     try {
-      await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 800);
-      setTimeout(() => navigate("/signin", { replace: true }), 2000);
-    } catch (error) {
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    formData.email,
+    formData.password
+  );
+  await sendEmailVerification(userCredential.user);
+  setShowToast(true);
+  setTimeout(() => setShowToast(false), 800);
+  setTimeout(() => navigate("/verify-email", { replace: true }), 2000);
+  }
+    catch (error) {
       if (error.code === "auth/email-already-in-use") {
         setErrorMsg("This email is already registered. Please sign in.");
       } else if (error.code === "auth/weak-password") {
@@ -62,8 +63,8 @@ function Signup() {
 
       {showToast && (
         <div className="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-fade">
-          Account created successfully!
-        </div>
+  Account created! Please check your email to verify.
+      </div>
       )}
 
       <div className="w-full max-w-md bg-white/40 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-8 z-10 mx-4 sm:mx-0">

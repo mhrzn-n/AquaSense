@@ -1,99 +1,112 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import { useState } from "react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../firebase/Firebase";
 
 function ForgotPasswordLink() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccessMessage("");
 
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setError("Please enter a valid email.");
       return;
     }
 
+    setLoading(true);
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/auth/forgot-password",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccessMessage("A reset link has been sent to your email!");
-        setError("");
-      } else {
-        setError(data.error || "Something went wrong.");
-      }
+      await sendPasswordResetEmail(auth, email);
+      setSuccessMessage("Password reset link sent to your email!");
+      setEmail("");
     } catch (err) {
-      setError("Failed to send reset email.");
+      if (err.code === "auth/user-not-found") {
+        setError("No account found with this email.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.");
+      } else {
+        setError("Failed to send reset email. Try again.");
+      }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleClose = () => {
+    setIsPopupOpen(false);
+    setEmail("");
+    setError("");
+    setSuccessMessage("");
   };
 
   return (
     <div>
-      {/* Link to open the popup */}
       <div className="text-right mb-4">
-        <a
+        
           href="#"
           onClick={(e) => {
             e.preventDefault();
             setIsPopupOpen(true);
           }}
-          className="text-sm text-blue-600 hover:underline"
+          <a className="text-sm text-blue-600 hover:underline"
         >
           Forgot password?
         </a>
       </div>
 
       {isPopupOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-          <div className="bg-white p-6 rounded shadow-md w-96">
-            <h2 className="text-lg font-semibold mb-4">Forgot Password</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-96">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              Reset Password
+            </h2>
+            <p className="text-sm text-slate-500 mb-4">
+              Enter your email and we'll send you a reset link.
+            </p>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label htmlFor="email" className="block text-sm text-gray-700">
-                  Enter your email:
+                <label
+                  htmlFor="reset-email"
+                  className="block text-sm font-medium text-slate-700 mb-1"
+                >
+                  Email address
                 </label>
                 <input
                   type="email"
-                  id="email"
-                  name="email"
+                  id="reset-email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded"
-                  placeholder="Your email"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl outline-none focus:border-blue-400"
+                  placeholder="email@gmail.com"
                 />
               </div>
 
-              {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+              {error && (
+                <p className="text-red-500 text-sm mb-3">{error}</p>
+              )}
               {successMessage && (
-                <p className="text-green-500 text-sm mb-2">{successMessage}</p>
+                <p className="text-green-600 text-sm mb-3">{successMessage}</p>
               )}
 
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <button
                   type="button"
-                  className="text-sm text-gray-600 hover:text-gray-800"
-                  onClick={() => setIsPopupOpen(false)}
+                  className="text-sm text-slate-500 hover:text-slate-700"
+                  onClick={handleClose}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                  disabled={loading}
+                  className="bg-blue-600 text-white py-2 px-5 rounded-xl hover:bg-blue-700 transition disabled:opacity-50 text-sm font-medium"
                 >
-                  Send Reset Link
+                  {loading ? "Sending..." : "Send Reset Link"}
                 </button>
               </div>
             </form>

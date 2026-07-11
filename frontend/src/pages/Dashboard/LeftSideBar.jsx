@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import axios from "axios";
-import Cookies from "js-cookie";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase/Firebase";
 import {
   LayoutDashboard,
   BellDot,
@@ -58,31 +58,18 @@ const LeftSideBar = ({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    if (isLoggingOut) return;
-    setIsLoggingOut(true);
-
-    const token = Cookies.get("authToken");
-
-    try {
-      await axios.post(
-        "https://AquaSense.onrender.com/api/auth/logout",
-        {},
-        {
-          headers: token
-            ? {
-                Authorization: `Bearer ${token}`,
-              }
-            : {},
-        }
-      );
-    } catch (error) {
-      console.error("Failed to logout:", error);
-    } finally {
-      Cookies.remove("authToken");
-      setIsLoggingOut(false);
-      navigate("/", { replace: true });
-    }
-  };
+  if (isLoggingOut) return;
+  setIsLoggingOut(true);
+  try {
+    await signOut(auth);
+    navigate("/", { replace: true });
+  } catch (error) {
+    console.error("Failed to logout:", error);
+  } finally {
+    setIsLoggingOut(false);
+  }
+};
+  
 
   const isCompact = isCollapsed;
 
@@ -107,7 +94,7 @@ const LeftSideBar = ({
                 isCompact ? "text-lg" : "text-2xl tracking-wide"
               }`}
             >
-              {isCompact ? "H₂O" : "AquaSense"}
+              {isCompact ? "AS" : "AquaSense"}
             </p>
             <button
               type="button"

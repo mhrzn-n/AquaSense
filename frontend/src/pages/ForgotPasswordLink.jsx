@@ -48,8 +48,7 @@ function ForgotPasswordLink() {
     <div>
       <div className="text-right mb-4">
         
-          href="#"
-          onClick={(e) => {
+         {(e) => {
             e.preventDefault();
             setIsPopupOpen(true);
           }}

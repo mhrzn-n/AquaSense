@@ -47,15 +47,13 @@ function ForgotPasswordLink() {
   return (
     <div>
       <div className="text-right mb-4">
-        
-         {(e) => {
-            e.preventDefault();
-            setIsPopupOpen(true);
-          }}
-          <a className="text-sm text-blue-600 hover:underline"
+        <button
+          type="button"
+          onClick={() => setIsPopupOpen(true)}
+          className="text-sm text-blue-600 hover:underline bg-transparent border-none cursor-pointer p-0"
         >
           Forgot password?
-        </a>
+        </button>
       </div>
 
       {isPopupOpen && (

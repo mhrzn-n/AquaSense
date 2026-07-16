@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Droplet, Thermometer, Beaker, Wind, FlaskConical } from "lucide-react";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db, auth } from "../../firebase/Firebase";
 import TankForm from "../../components/TankForm";
 import SensorCard from "../../components/SensorCard";
 import ForecastWidget from "../../components/ForecastWidget";
-import { getTanks, deleteTank } from "../../services/api";
+import { deleteTank } from "../../services/api";
 import { getStatus } from "../../utils/getStatus";
 
 const Dashboard = () => {
@@ -14,27 +16,34 @@ const Dashboard = () => {
   const [selectedTankId, setSelectedTankId] = useState(null);
   const [error, setError] = useState("");
 
-  const fetchTanks = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await getTanks();
-      const tankList = data.tanks || [];
-      setTanks(tankList);
-      if (tankList.length > 0 && !selectedTankId) {
-        setSelectedTankId(tankList[0].tankId);
-      }
-    } catch (err) {
-      console.error("Error fetching tanks:", err);
-      setError("Failed to load tanks. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchTanks();
-  }, [fetchTanks]);
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const tanksRef = collection(db, "users", user.uid, "tanks");
+
+    const unsubscribe = onSnapshot(
+      tanksRef,
+      (snapshot) => {
+        const tankList = snapshot.docs.map(doc => ({
+          tankId: doc.id,
+          ...doc.data(),
+        }));
+        setTanks(tankList);
+        if (tankList.length > 0 && !selectedTankId) {
+          setSelectedTankId(tankList[0].tankId);
+        }
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Firestore listener error:", err);
+        setError("Failed to load tanks. Please try again.");
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const handleAddTank = () => {
     setEditingTank(null);
@@ -50,7 +59,6 @@ const Dashboard = () => {
     if (!window.confirm("Are you sure you want to delete this tank?")) return;
     try {
       await deleteTank(tankId);
-      await fetchTanks();
     } catch (err) {
       console.error("Error deleting tank:", err);
       alert("Failed to delete tank. Please try again.");
@@ -58,7 +66,7 @@ const Dashboard = () => {
   };
 
   const handleSaveTank = async () => {
-    await fetchTanks();
+    // Firestore listener will auto-update tanks list
   };
 
   const selectedTank = tanks.find(t => t.tankId === selectedTankId);
@@ -155,10 +163,12 @@ const Dashboard = () => {
                     <div className="flex justify-between text-sm text-slate-600 mb-1">
                       <span>Water Level</span>
                       <span className="font-semibold">
-                        {selectedTank.level !== undefined ? `${selectedTank.level}%` : 'N/A'}
+                        {selectedTank.level !== null && selectedTank.level !== undefined
+                          ? `${selectedTank.level}%`
+                          : 'No data yet'}
                       </span>
                     </div>
-                    {selectedTank.level !== undefined && (
+                    {selectedTank.level !== null && selectedTank.level !== undefined && (
                       <div className="w-full bg-slate-200 rounded-full h-3">
                         <div
                           className={`h-3 rounded-full transition-all ${
@@ -173,6 +183,13 @@ const Dashboard = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* LAST UPDATED */}
+                  {selectedTank.updated && (
+                    <p className="text-xs text-slate-400 mt-3">
+                      Last updated: {new Date(selectedTank.updated).toLocaleString()}
+                    </p>
+                  )}
                 </div>
 
                 {/* SENSOR CARDS */}

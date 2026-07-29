@@ -1,118 +1,109 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+
+const navLinks = [
+  { name: "Home", route: "/" },
+  { name: "About", route: "/about" },
+  { name: "Features", route: "/features" },
+  { name: "Demo", route: "/demo" },
+  { name: "Team", route: "/team" },
+  { name: "Contact", route: "/contact" },
+];
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const handleLinkClick = () => setIsOpen(false);
-
-  // Sections array: key is route (for router) and id (for scroll)
-  const sections = [
-    { name: "Home", id: "home", route: "/" },
-    { name: "About", id: "about", route: "/about" },
-    { name: "Features", id: "features", route: "/features" },
-    { name: "Subscription", id: "Subscription", route: "/Subscription" },
-    { name: "Demo", id: "demo", route: "/demo" },
-    { name: "Team", id: "team", route: "/team" },
-    { name: "Gallery", id: "gallery", route: "/gallery" },
-    { name: "Contact", id: "contact", route: "/contact" },
-    { name: "Signin", id: "signin", route: "/signin" },
-    { name: "Signup", id: "signup", route: "/signup" },
-  ];
+  const location = useLocation();
 
   return (
-    <header
-      className="sticky top-0 z-30 font-sans shadow-lg"
-      style={{
-        backgroundColor: "#ffffff",
-        backgroundImage: `
-          radial-gradient(circle at top right, rgba(70, 130, 180, 0.5), transparent 70%),
-          radial-gradient(circle at bottom left, rgba(0, 191, 255, 0.3), transparent 70%),
-          linear-gradient(to right, #d1d5db 1px, transparent 1px),
-          linear-gradient(to bottom, #d1d5db 1px, transparent 1px)
-        `,
-        backdropFilter: "blur(60px)",
-        backgroundSize: "100% 100%, 100% 100%, 50px 50px, 50px 50px",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="container flex items-center justify-between px-6 py-4 mx-auto">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-100">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
         {/* Logo */}
-        <Link
-          to="/"
-          className="flex items-center space-x-2 text-2xl font-bold text-blue-800"
-          onClick={handleLinkClick}
-        >
-          <span>AquaSense</span>
+        <Link to="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
+          <img src="/LOGO.jpeg" alt="AquaSense" className="w-8 h-8" />
+          <span className="text-xl font-bold text-slate-900 tracking-tight">AquaSense</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden space-x-6 text-blue-800 md:flex">
-          {sections.map((section) => (
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-8">
+          {navLinks.map(link => (
             <Link
-              key={section.id}
-              to={section.route}
-              onClick={handleLinkClick}
-              className="relative hover:text-blue-500 transition-colors duration-300 after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-blue-400 hover:after:w-full after:transition-all after:duration-300"
+              key={link.route}
+              to={link.route}
+              className={`text-sm font-medium transition-colors duration-200 ${
+                location.pathname === link.route
+                  ? 'text-blue-600'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              {section.name}
+              {link.name}
             </Link>
           ))}
         </nav>
 
-        {/* Mobile Hamburger */}
-        <div className="md:hidden">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="text-blue-800 focus:outline-none"
+        {/* CTA Buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            to="/signin"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
-            {isOpen ? (
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            ) : (
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            )}
-          </button>
+            Sign In
+          </Link>
+          <Link
+            to="/signup"
+            className="text-sm font-semibold px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm shadow-blue-600/20"
+          >
+            Sign Up 
+          </Link>
         </div>
+
+        {/* Mobile Hamburger */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition"
+        >
+          {isOpen ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <nav className="px-6 py-4 space-y-3 text-blue-800 md:hidden">
-          {sections.map((section) => (
+        <div className="md:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-1">
+          {navLinks.map(link => (
             <Link
-              key={section.id}
-              to={section.route}
-              onClick={handleLinkClick}
-              className="block px-4 py-2 transition-colors duration-300 rounded hover:bg-blue-100 hover:text-blue-600"
+              key={link.route}
+              to={link.route}
+              onClick={() => setIsOpen(false)}
+              className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition"
             >
-              {section.name}
+              {link.name}
             </Link>
           ))}
-        </nav>
+          <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+            <Link
+              to="/signin"
+              onClick={() => setIsOpen(false)}
+              className="block px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signup"
+              onClick={() => setIsOpen(false)}
+              className="block px-3 py-2 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 text-center transition"
+            >
+              Sign Up 
+            </Link>
+          </div>
+        </div>
       )}
     </header>
   );

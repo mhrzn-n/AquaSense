@@ -10,7 +10,6 @@ const stats = [
 const mockReadings = [
   { label: "TDS", value: "340 ppm", status: "good" },
   { label: "pH Level", value: "7.2", status: "good" },
-  { label: "Turbidity", value: "1.8 NTU", status: "good" },
   { label: "Temperature", value: "27.3°C", status: "good" },
   { label: "Water Level", value: "72%", status: "warning" },
   { label: "Freshness", value: "18.5 hrs", status: "good" },
@@ -56,7 +55,7 @@ const HeroSection = () => {
         {/* Subheading */}
         <p className="text-center text-lg text-slate-500 max-w-xl mx-auto mb-10 leading-relaxed">
           AquaSense monitors your water tank in real time-tracking TDS, pH,
-          turbidity, temperature, and predicting freshness before quality degrades.
+          temperature, and predicting freshness before quality degrades.
         </p>
 
         {/* CTA Buttons */}

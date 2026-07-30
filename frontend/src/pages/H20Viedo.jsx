@@ -1,5 +1,5 @@
 import Container from "../components/Container";
-import viedo from "../assets/viedo.mp4";
+import viedo from "../assets/video.mp4";
 
 const H20Video = () => {
   return (

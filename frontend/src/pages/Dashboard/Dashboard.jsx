@@ -11,7 +11,6 @@ const sensorConfig = [
   { key: "temperature", label: "Temperature", unit: "°C", icon: Thermometer },
   { key: "tds", label: "TDS", unit: "ppm", icon: Beaker },
   { key: "ph", label: "pH Level", unit: "", icon: FlaskConical },
-  { key: "turbidity", label: "Turbidity", unit: "NTU", icon: Wind },
   { key: "freshness_window_hours", label: "Freshness", unit: "hrs", icon: Droplet },
 ];
 
@@ -69,6 +68,55 @@ const SensorCard = ({ label, value, unit, status, Icon }) => {
     </div>
   );
 };
+                      const WaterTank = ({ level }) => {
+                        const waterLevel = Math.max(0, Math.min(level || 0, 100));
+
+                        return (
+                          <div className="flex flex-col items-center">
+                            {/* Tank Cap */}
+                            <div className="w-20 h-4 bg-slate-700 rounded-t-xl"></div>
+
+                            {/* Tank */}
+                            <div className="relative w-48 h-72 border-[5px] border-slate-700 rounded-[35px] overflow-hidden bg-slate-100 shadow-lg">
+
+                              {/* Water */}
+                              <div
+                                className="absolute bottom-0 left-0 w-full transition-all duration-1000 ease-in-out"
+                                style={{
+                                  height: `${waterLevel}%`,
+                                  background:
+                                    "linear-gradient(to top,#38bdf8,#60a5fa,#93c5fd)",
+                                }}
+                              >
+                                {/* Wave */}
+                                <div className="absolute -top-3 left-0 w-full h-6 opacity-70">
+                                  <svg
+                                    viewBox="0 0 500 40"
+                                    preserveAspectRatio="none"
+                                    className="w-full h-full"
+                                  >
+                                    <path
+                                      d="M0,20 C80,0 150,40 250,20 C350,0 420,40 500,20 L500,40 L0,40 Z"
+                                      fill="#7dd3fc"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+
+                              {/* Percentage */}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-3xl font-bold text-slate-800 drop-shadow-sm">
+                                  {waterLevel}%
+                                </span>
+                              </div>
+                            </div>
+
+                            <p className="mt-4 text-lg font-semibold text-slate-700">
+                              Water Level
+                            </p>
+                          </div>
+                        );
+                      };
 
 const Dashboard = () => {
   const [tanks, setTanks] = useState([]);
@@ -228,34 +276,17 @@ const Dashboard = () => {
 
                   {/* WATER LEVEL */}
                   <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-slate-500 font-medium">Water Level</span>
-                      <span className="font-semibold text-slate-800">
-                        {selectedTank.level !== null && selectedTank.level !== undefined
-                          ? `${selectedTank.level}%`
-                          : 'No data yet'}
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5">
-                      {selectedTank.level !== null && selectedTank.level !== undefined && (
-                        <div
-                          className={`h-2.5 rounded-full transition-all duration-500 ${
-                            selectedTank.level < 20
-                              ? 'bg-red-500'
-                              : selectedTank.level < 50
-                              ? 'bg-amber-400'
-                              : 'bg-gradient-to-r from-blue-500 to-cyan-400'
-                          }`}
-                          style={{ width: `${selectedTank.level}%` }}
-                        />
-                      )}
-                    </div>
-                    {selectedTank.updated && (
-                      <p className="text-xs text-slate-300 mt-2 flex items-center gap-1">
-                        <Activity size={10} />
-                        Last updated {new Date(selectedTank.updated).toLocaleString()}
-                      </p>
-                    )}
+                  <div className="flex flex-col items-center py-6">
+
+  <WaterTank level={selectedTank.level ?? 0} />
+
+  {selectedTank.updated && (
+    <p className="mt-5 text-sm text-slate-400 text-center">
+      Last Updated • {new Date(selectedTank.updated).toLocaleString()}
+    </p>
+  )}
+
+</div>
                   </div>
                 </div>
 
